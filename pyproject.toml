@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "boba-mcp"
+version = "0.1.0"
+description = "Your AI agent's security bouncer."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = ["mcp>=2.3,<3", "pydantic>=2.12,<3", "PyYAML>=6,<7", "jsonschema>=4.23,<5"]
+
+[project.optional-dependencies]
+dashboard = ["streamlit>=1.40,<2"]
+dev = ["pytest>=8,<10", "pytest-asyncio>=1,<2"]
+
+[project.scripts]
+boba = "boba.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/boba"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

@@ -1,0 +1,10 @@
+version: 1
+agent_id: demo-agent
+policy: policies.yaml
+database: ../events.db
+downstream:
+  name: demo-filesystem
+  command: '@python'
+  args: [demo/vulnerable_server.py]
+  cwd: ..
+  timeout_seconds: 10.0

@@ -1,0 +1,24 @@
+version: 1
+defaults:
+  action: block
+servers:
+  demo-filesystem:
+    allowed_tools: [read_file, list_directory]
+    approved_roots: [../demo/safe_files]
+    path_arguments:
+      read_file: [path]
+      list_directory: [path]
+rules:
+  - id: SEC-001
+    name: Protected credentials (in addition to built-in protections)
+    action: block
+    paths: ['**/.aws/**', '**/.ssh/**', '**/.env*', '**/secrets/**']
+  - id: SEC-002
+    name: Dangerous command tools
+    action: block
+    tools: [execute_command, run_shell, shell_exec]
+  - id: SEC-003
+    name: Excessive tool usage
+    action: alert
+    threshold: 30
+    window_seconds: 60
