@@ -11,15 +11,25 @@ import streamlit as st
 from boba.config import Settings, load_yaml
 from boba.security.policy_engine import Policy
 
+MASCOT = Path(__file__).parent / "assets" / "boba.png"
+
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=Path("config/boba.yaml"))
     options, _ = parser.parse_known_args()
-    st.set_page_config(page_title="Boba Security Dashboard", layout="wide")
-    st.title("Boba Security Dashboard")
-    st.caption("Boba checks the tools. You control the access.")
-    st.button("Refresh")
+    st.set_page_config(page_title="Boba Security Dashboard", page_icon=str(MASCOT), layout="wide")
+    mascot, heading = st.columns([1, 5])
+    with mascot:
+        st.image(str(MASCOT), width=160)
+    with heading:
+        st.title("Boba Security Dashboard")
+        st.markdown("**Your AI agent's security bouncer.**")
+        st.caption("Boba checks the tools. You control the access.")
+        st.button("Refresh", type="primary")
+    st.divider()
+    st.sidebar.title("Your security view")
+    st.sidebar.caption("Filter real MCP activity. Every request gets checked at the door.")
     try:
         config_path = options.config.resolve(strict=True)
         config = Settings.load(config_path)
@@ -39,7 +49,7 @@ def main() -> None:
     if events.empty:
         for column, label in zip(st.columns(4), ["Total MCP tool calls", "Allowed requests", "Blocked requests", "Security alerts"]):
             column.metric(label, 0)
-        st.info("No security events yet. Run the demo client through Boba, then refresh.")
+        st.info("Boba is ready at the door. Run the demo client through Boba, then refresh to see real security events.")
     else:
         for field in ("rule_ids", "alerts"):
             events[field] = events[field].map(json.loads)

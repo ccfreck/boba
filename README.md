@@ -1,13 +1,32 @@
-# Boba
+<div align="center">
+  <img src="src/boba/dashboard/assets/boba.png" alt="Boba mascot: a milk tea cup wearing sunglasses" width="240" />
+  <h1>Boba</h1>
+  <p><strong>Your AI agent's security bouncer.</strong></p>
+  <p>Boba checks the tools. You control the access.</p>
+  <p>
+    <img src="https://img.shields.io/badge/version-0.1.0-8B5E3C?style=flat-square" alt="Version 0.1.0" />
+    <img src="https://img.shields.io/badge/Python-3.11%2B-25211D?style=flat-square" alt="Python 3.11 or newer" />
+    <img src="https://img.shields.io/badge/MCP-security_gateway-8B5E3C?style=flat-square" alt="MCP security gateway" />
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-25211D?style=flat-square" alt="MIT license" /></a>
+  </p>
+  <p>
+    <a href="#install">Get started</a> ·
+    <a href="#demonstrate-enforcement">Try the demo</a> ·
+    <a href="#dashboard">Dashboard</a> ·
+    <a href="docs/threat-model.md">Threat model</a>
+  </p>
+</div>
 
-**Your AI agent's security bouncer.**
-
-**Boba checks the tools. You control the access.**
+---
 
 Boba is a local, open-source MCP runtime security gateway for security engineers,
 SOC analysts, AI security researchers, and Python developers. An agent connects to
 Boba instead of directly to its MCP server. Boba validates and authorizes each
 tool call **before** forwarding it.
+
+| Check the request | Control execution | See what happened |
+| --- | --- | --- |
+| Validate tools, arguments, and filesystem paths. | Block unauthorized calls before they execute. | Inspect sanitized events and alerts in the local dashboard. |
 
 ## Why Boba?
 
@@ -23,7 +42,7 @@ flowchart TB
     Agent["AI agent / MCP client"]
     Config["Administrator-owned YAML policies"]
 
-    subgraph Boba["Boba security gateway"]
+    subgraph Boba["Boba · Your AI agent's security bouncer"]
         Gateway["MCP stdio interface"]
         Discovery["Discover tools and expose permitted definitions"]
         Rate["Count attempts and collect frequency alerts"]
@@ -66,9 +85,11 @@ flowchart TB
     classDef deny fill:#fee2e2,stroke:#b91c1c,color:#111827
     classDef allow fill:#dcfce7,stroke:#15803d,color:#111827
     classDef monitor fill:#dbeafe,stroke:#1d4ed8,color:#111827
+    classDef brand fill:#f5e3cc,stroke:#8b5e3c,color:#25211d
     class Denied,Reject deny
     class Forward,Server allow
     class Rate,DB,Dashboard monitor
+    class Gateway,Discovery,Policy,Audit brand
 ```
 
 GitHub renders this Mermaid.js diagram directly in the README. Alerts are monitoring
@@ -217,6 +238,8 @@ streamlit run src/boba/dashboard/app.py --server.address 127.0.0.1 -- --config c
 ```
 
 Open the local URL printed by Streamlit. Click **Refresh** after making calls.
+The dashboard uses Boba's sunglasses mascot and a milk-tea-inspired cream,
+caramel, and dark-ink theme, configured in `.streamlit/config.toml`.
 Filter by severity, tool, or decision. Metrics reflect the filters; recent and
 blocked tables display up to 500 rows. “Allowed” means authorization succeeded;
 `outcome` distinguishes successful execution, downstream error, cancellation, or
