@@ -16,6 +16,19 @@ An agent with other tools could go around Boba by:
 send that request through Boba.** Which bypasses are possible depends on the
 agent's host permissions and configuration.
 
+### Today: another door may be open
+
+```mermaid
+flowchart LR
+    Agent[AI agent] --> Boba[Boba checks rules]
+    Boba --> MCP[Configured MCP server]
+    Agent -.->|If host permissions allow| Other[Other tools or direct MCP connections]
+    Other --> Access[Files and services outside Boba's checks]
+```
+
+The agent may already have these other tools, or may be able to set them up using
+its terminal. Boba does not see requests sent through those other connections.
+
 ## Architecture options
 
 | Option | Why choose it? | Gap remaining |
@@ -33,22 +46,58 @@ that routes to several separately sandboxed MCP servers.
 
 **Start with option 3: put the agent in a sandbox and keep Boba outside it.**
 
-```text
-INSIDE AGENT SANDBOX
-  Agent + working files + restricted terminal
-                    |
-          Controlled connection
-                    |
-                    v
-OUTSIDE AGENT SANDBOX
-  Boba: rules, protected credentials, audit logs
-                    |
-                    v
-  Approved MCP servers → Protected files and services
+```mermaid
+flowchart TB
+    subgraph Sandbox[Inside agent sandbox]
+        Agent[AI agent]
+        Terminal[Restricted terminal]
+        Workspace[Provided working files]
+        Agent --> Terminal
+        Terminal --> Workspace
+    end
+    subgraph Outside[Outside agent sandbox]
+        Boba[Boba checks rules and records requests]
+        MCP[Approved MCP server]
+        Protected[Protected files and services]
+        Boba -->|Approved requests only| MCP
+        MCP --> Protected
+    end
+    Agent -->|Controlled MCP connection| Boba
+    Agent -.->|Direct access attempt| Denied[Blocked by sandbox restrictions]
 ```
 
 The agent can work on files explicitly provided to it. Protected operations must
 go through Boba. MCP servers can later run in their own separate sandboxes.
+
+The blocked path represents restrictions we must configure and verify—not
+something a container provides automatically. Boba and the MCP server are started
+outside the agent's container, so they are not inside its sandbox.
+
+### How the agent connects to tools
+
+**Boba acts as an MCP server to the agent, and as an MCP client to the tool server.**
+The agent needs only the connection to Boba.
+
+```mermaid
+sequenceDiagram
+    participant Agent as Agent (inside sandbox)
+    participant Boba as Boba (outside sandbox)
+    participant MCP as Tool server (outside sandbox)
+    Agent->>Boba: What tools can I use?
+    Boba-->>Agent: Approved tools
+    Agent->>Boba: Run read_file
+    Boba->>Boba: Check rules
+    alt Allowed and initial audit record saved
+        Boba->>MCP: Run read_file
+        MCP-->>Boba: Result or error
+        Boba-->>Agent: Result or error
+    else Denied or initial audit write failed
+        Boba-->>Agent: Blocked - tool never runs
+    end
+```
+
+The connection across the sandbox boundary still needs to be implemented.
+These diagrams show the proposed architecture, not the current demo.
 
 ### Why this approach?
 
