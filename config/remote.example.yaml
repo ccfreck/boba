@@ -1,0 +1,6 @@
+# Copy to a private client-side configuration; these paths are examples.
+# The key authenticates to Boba only, not to protected downstream services.
+host: gateway.example.test
+port: 2222
+identity_file: ./private/agent_ed25519
+known_hosts_file: ./private/known_hosts

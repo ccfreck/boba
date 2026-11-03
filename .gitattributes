@@ -1,0 +1,3 @@
+deploy/milestone-one/boba-session text eol=lf
+deploy/milestone-one/*.service text eol=lf
+deploy/milestone-one/sshd_config text eol=lf

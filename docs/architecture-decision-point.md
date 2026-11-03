@@ -38,13 +38,38 @@ its terminal. Boba does not see requests sent through those other connections.
 | 3. Sandboxed agent, Boba outside | Restricts the agent's access and makes Boba the required route to protected tools. | Approved MCP servers still need their own access restrictions. |
 | 4. Sandboxed agent and separately sandboxed servers | Also limits damage from buggy or malicious approved tools. | More setup and maintenance; allowed responses still need careful handling. |
 | 5. Shared Boba service | Gives multiple agents or users central policies and logs. | Requires authentication, per-user permissions, and reliable hosting; agent restrictions are still needed. |
+| 6. Network-enforced gateway | Makes Boba the required network route to selected protected remote resources. | Local file, process, and credential access on the agent host remains outside this boundary. |
 
 These options can be combined. For example, a sandboxed agent can use one gateway
 that routes to several separately sandboxed MCP servers.
 
-## Recommended architecture
+## Selected first milestone: network-enforced gateway
 
-**Start with option 3: put the agent in a sandbox and keep Boba outside it.**
+**Start with option 6: enforce network access through Boba.** No agent sandbox,
+container, or VM provisioning is part of this milestone. The agent remains in its
+existing environment, with an independently managed network control denying direct
+access to the selected protected remote resources.
+
+```mermaid
+flowchart LR
+    Agent["Agent host"] -->|"Allowed connection"| Boba["Boba gateway"]
+    Boba -->|"Approved requests"| Tools["Protected tools and services"]
+    Agent -.->|"Direct connection blocked"| Tools
+```
+
+Boba runs on a separate gateway host. Its existing local stdio connection to one
+MCP server can remain on that host. An initial MCP-over-SSH client adapter and
+dedicated server configuration are now provided in the
+[deployment guide](../deploy/milestone-one/README.md). Gateway deployment,
+authentication enforcement, and external network rules still require verification.
+Local files, processes, and credentials on the agent machine are outside the
+network boundary. See the [Milestone One plan](../milestoneOne.md) for acceptance
+criteria, assumptions, and deliverables.
+
+## Alternative for future consideration: agent sandbox
+
+Option 3 would put the agent in a sandbox and keep Boba outside it. The following
+diagrams describe that alternative, which is not selected for Milestone One.
 
 ```mermaid
 flowchart TB
@@ -99,7 +124,7 @@ sequenceDiagram
 The connection across the sandbox boundary still needs to be implemented.
 These diagrams show the proposed architecture, not the current demo.
 
-### Why this approach?
+### What the sandbox alternative would add
 
 - **Closes side doors:** restrict file, process, and network access that could
   bypass Boba.
@@ -111,7 +136,7 @@ These diagrams show the proposed architecture, not the current demo.
 - **Starts small:** prove the boundary with one agent and one MCP server before
   adding multi-server routing or shared hosting.
 
-## What must be enforced
+### What the sandbox alternative would need to enforce
 
 - Give the agent access only to approved working files, not Boba's configuration,
   credentials, or protected host files.
@@ -127,13 +152,18 @@ must enforce these limits.**
 
 ## Decision status and next step
 
-**Proposed, not yet implemented or approved.** Boba currently provides one local
-stdio connection; it does not create an agent sandbox or enforce this boundary.
+**Selected as the first milestone; implementation started, deployment verification pending.**
+Boba currently provides one local stdio connection; it does not create an agent
+sandbox or enforce the proposed network boundary.
 
-Next step: build a small proof of concept with one sandboxed agent, Boba outside,
-and one MCP server. Verify that an approved request succeeds through Boba while
-direct access to protected files, credentials, and services fails.
+The [Milestone One plan](../milestoneOne.md) defines the scope, simple architecture
+diagram, deliverables, and acceptance criteria. Build a proof of concept with one
+agent host, a separate Boba gateway host, one MCP server, and independently managed
+network controls. Verify that approved requests succeed through Boba while direct
+network access to selected protected tools and services fails. Agent-side
+sandboxes, containers, and local filesystem isolation are outside this milestone.
 
-This addresses bypasses. It does not by itself add response inspection, prevent
+This addresses the selected network bypasses. It does not protect local files or
+credentials on the agent host, add response inspection, prevent
 every harmful allowed operation, or make audit logs tamper-proof. See the
 [threat model](threat-model.md) for the existing limitations.

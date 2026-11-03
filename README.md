@@ -163,6 +163,12 @@ If Boba cannot save the initial audit record, it does not forward the request.
 
 For the implementation details, see the [architecture guide](docs/architecture.md).
 
+Milestone One adds an initial **MCP-over-SSH client adapter** and gateway deployment
+configuration. See the [network deployment guide](deploy/milestone-one/README.md)
+and [milestone plan](milestoneOne.md). The network boundary still requires actual
+hosts, firewall configuration, and deployment acceptance testing.
+Start on the current PC with the [single-device test guide](docs/milestone-one-local.md).
+
 ## Configuration
 
 There are two files to know:

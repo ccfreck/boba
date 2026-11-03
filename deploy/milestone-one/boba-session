@@ -1,0 +1,16 @@
+#!/bin/sh
+# Administrator-owned forced command; never evaluate SSH_ORIGINAL_COMMAND.
+set -eu
+if [ -n "${SSH_ORIGINAL_COMMAND:-}" ]; then
+    printf '%s\n' 'Boba endpoint accepts MCP sessions only' >&2
+    exit 1
+fi
+umask 077
+cd /opt/boba
+# Bound concurrent authenticated sessions to one across SSH connections.
+# Deployment creates this directory and lock file, writable only by boba-mcp.
+exec 9>/var/lib/boba/session.lock
+/usr/bin/flock -n 9 || exit 1
+# Keep ambient SSH/client variables out of Boba and the tool server.
+exec /usr/bin/env -i HOME=/var/lib/boba PATH=/usr/bin:/bin \
+    /opt/boba/.venv/bin/python -I -m boba.main --config /etc/boba/boba.yaml

@@ -1,0 +1,32 @@
+# Dedicated daemon configuration. Do not append to the administrative sshd file.
+Port 2222
+# Bind only the gateway's intended interface before deployment.
+ListenAddress 127.0.0.1
+HostKey /etc/boba/ssh_host_ed25519_key
+PidFile /run/boba-sshd.pid
+AllowUsers boba-mcp
+AuthenticationMethods publickey
+PubkeyAuthentication yes
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitEmptyPasswords no
+PermitRootLogin no
+HostbasedAuthentication no
+UsePAM no
+StrictModes yes
+AuthorizedKeysFile /etc/boba/authorized_keys
+PermitUserEnvironment no
+PermitUserRC no
+PermitTTY no
+DisableForwarding yes
+PermitTunnel no
+MaxAuthTries 3
+MaxSessions 1
+MaxStartups 3:50:10
+LoginGraceTime 20
+ClientAliveInterval 15
+ClientAliveCountMax 2
+PrintMotd no
+PrintLastLog no
+LogLevel VERBOSE
+ForceCommand /usr/local/libexec/boba-session
